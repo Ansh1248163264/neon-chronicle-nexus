@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import Navigation from "./Navigation";
+import { ParticleBackground } from "./ParticleBackground";
+import { AnimatedGradient } from "./AnimatedGradient";
 
 interface LayoutProps {
   children: ReactNode;
@@ -8,12 +10,16 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
+      <AnimatedGradient />
+      <ParticleBackground />
+      
       {/* Animated Background Grid */}
       <div className="fixed inset-0 cyber-grid opacity-20 pointer-events-none" />
       
       {/* Floating Glow Orbs */}
       <div className="fixed top-20 left-10 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-float pointer-events-none" />
       <div className="fixed bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] animate-float [animation-delay:1s] pointer-events-none" />
+      <div className="fixed top-1/2 left-1/2 w-96 h-96 bg-accent/10 rounded-full blur-[120px] animate-float [animation-delay:2s] pointer-events-none" />
       
       <Navigation />
       

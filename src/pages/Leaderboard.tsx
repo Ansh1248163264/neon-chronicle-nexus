@@ -44,21 +44,21 @@ const Leaderboard = () => {
       <section className="py-20 container mx-auto px-4">
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <Card className="glass-card text-center p-6">
-            <div className="text-3xl font-bold neon-text mb-2">50,247</div>
-            <div className="text-sm text-muted-foreground">Active Players</div>
+          <Card className="glass-card premium-card text-center p-6 border-2 border-primary/20">
+            <div className="text-4xl font-bold neon-text mb-2">50,247</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider">Active Players</div>
           </Card>
-          <Card className="glass-card text-center p-6">
-            <div className="text-3xl font-bold neon-text-magenta mb-2">1.2M</div>
-            <div className="text-sm text-muted-foreground">Matches Played</div>
+          <Card className="glass-card premium-card text-center p-6 border-2 border-secondary/20">
+            <div className="text-4xl font-bold neon-text-magenta mb-2">1.2M</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider">Matches Played</div>
           </Card>
-          <Card className="glass-card text-center p-6">
-            <div className="text-3xl font-bold text-accent mb-2">$250K</div>
-            <div className="text-sm text-muted-foreground">Prize Pool</div>
+          <Card className="glass-card premium-card text-center p-6 border-2 border-accent/20">
+            <div className="text-4xl font-bold text-accent mb-2" style={{ textShadow: '0 0 20px hsl(var(--neon-purple) / 0.6)' }}>$250K</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider">Prize Pool</div>
           </Card>
-          <Card className="glass-card text-center p-6">
-            <div className="text-3xl font-bold neon-text mb-2">24/7</div>
-            <div className="text-sm text-muted-foreground">Tournaments</div>
+          <Card className="glass-card premium-card text-center p-6 border-2 border-primary/20">
+            <div className="text-4xl font-bold neon-text mb-2">24/7</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider">Tournaments</div>
           </Card>
         </div>
 
@@ -93,7 +93,7 @@ const Leaderboard = () => {
             {/* Remaining Rankings */}
             <div className="space-y-3">
               {players.slice(3).map((player) => (
-                <Card key={player.rank} className="glass-card hover:animate-glow-pulse transition-all">
+                <Card key={player.rank} className="glass-card premium-card border border-primary/10">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-6 flex-1">
@@ -101,16 +101,18 @@ const Leaderboard = () => {
                         <div className="flex-1">
                           <h4 className="text-xl font-semibold mb-1">{player.name}</h4>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{player.wins} Wins</span>
-                            <Badge variant="outline" className={`${getTierColor(player.tier)} border-0`}>
+                            <span className="font-mono">{player.wins} Wins</span>
+                            <Badge variant="outline" className={`${getTierColor(player.tier)} border-0 shadow-lg`}>
                               {player.tier}
                             </Badge>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">{player.score.toLocaleString()}</div>
-                        <div className="flex items-center text-sm text-green-500">
+                        <div className="text-2xl font-bold text-primary font-mono" style={{ textShadow: '0 0 20px hsl(var(--neon-cyan) / 0.5)' }}>
+                          {player.score.toLocaleString()}
+                        </div>
+                        <div className="flex items-center justify-end text-sm text-green-500 font-mono">
                           <TrendingUp className="w-4 h-4 mr-1" />
                           +125
                         </div>

@@ -96,14 +96,14 @@ const News = () => {
           {newsItems.slice(1).map((item, index) => (
             <Card 
               key={index} 
-              className="glass-card hover:animate-glow-pulse transition-all cursor-pointer group"
+              className="glass-card premium-card cursor-pointer group border border-primary/10"
             >
               <CardHeader>
                 <div className="flex items-center gap-4 mb-4">
-                  <Badge variant="outline" className="border-primary text-primary">
+                  <Badge variant="outline" className="border-primary text-primary shadow-lg">
                     {item.category}
                   </Badge>
-                  <div className="flex items-center text-sm text-muted-foreground">
+                  <div className="flex items-center text-sm text-muted-foreground font-mono">
                     <Calendar className="w-4 h-4 mr-2" />
                     {item.date}
                   </div>
@@ -113,8 +113,8 @@ const News = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>{item.excerpt}</CardDescription>
-                <Button variant="ghost" className="mt-4 p-0 h-auto text-primary hover:text-secondary">
+                <CardDescription className="leading-relaxed">{item.excerpt}</CardDescription>
+                <Button variant="ghost" className="mt-4 p-0 h-auto text-primary hover:text-secondary transition-all">
                   Read more <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </CardContent>

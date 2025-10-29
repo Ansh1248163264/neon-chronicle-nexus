@@ -129,16 +129,33 @@ All colors MUST be HSL.
   /* Neon Glow Text */
   .neon-text {
     text-shadow: 
-      0 0 10px hsl(var(--neon-cyan) / 0.8),
-      0 0 20px hsl(var(--neon-cyan) / 0.5),
-      0 0 30px hsl(var(--neon-cyan) / 0.3);
+      0 0 10px hsl(var(--neon-cyan) / 1),
+      0 0 20px hsl(var(--neon-cyan) / 0.8),
+      0 0 40px hsl(var(--neon-cyan) / 0.6),
+      0 0 60px hsl(var(--neon-cyan) / 0.4),
+      0 0 80px hsl(var(--neon-cyan) / 0.2);
   }
   
   .neon-text-magenta {
     text-shadow: 
-      0 0 10px hsl(var(--neon-magenta) / 0.8),
-      0 0 20px hsl(var(--neon-magenta) / 0.5),
-      0 0 30px hsl(var(--neon-magenta) / 0.3);
+      0 0 10px hsl(var(--neon-magenta) / 1),
+      0 0 20px hsl(var(--neon-magenta) / 0.8),
+      0 0 40px hsl(var(--neon-magenta) / 0.6),
+      0 0 60px hsl(var(--neon-magenta) / 0.4),
+      0 0 80px hsl(var(--neon-magenta) / 0.2);
+  }
+  
+  /* Premium card hover effect */
+  .premium-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .premium-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 0 40px hsl(var(--neon-cyan) / 0.4),
+      0 0 80px hsl(var(--neon-magenta) / 0.2),
+      inset 0 0 20px hsl(var(--neon-cyan) / 0.1);
   }
   
   /* Animated Gradient Border */

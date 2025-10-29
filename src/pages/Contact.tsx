@@ -37,21 +37,25 @@ const Contact = () => {
 
       <section className="py-20 container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <Card className="glass-card hover:animate-glow-pulse transition-all">
+          <Card className="glass-card premium-card">
             <CardHeader>
-              <Mail className="w-10 h-10 text-primary mb-4" />
-              <CardTitle>Email Us</CardTitle>
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4" style={{ boxShadow: '0 0 30px hsl(var(--neon-cyan) / 0.3)' }}>
+                <Mail className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Email Us</CardTitle>
               <CardDescription>Get a response within 24 hours</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground">contact@aestheticmadegames.com</p>
+              <p className="text-foreground font-mono text-sm">contact@aestheticmadegames.com</p>
             </CardContent>
           </Card>
 
-          <Card className="glass-card hover:animate-glow-pulse transition-all">
+          <Card className="glass-card premium-card">
             <CardHeader>
-              <MessageSquare className="w-10 h-10 text-secondary mb-4" />
-              <CardTitle>Live Chat</CardTitle>
+              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4" style={{ boxShadow: '0 0 30px hsl(var(--neon-magenta) / 0.3)' }}>
+                <MessageSquare className="w-8 h-8 text-secondary" />
+              </div>
+              <CardTitle className="text-2xl">Live Chat</CardTitle>
               <CardDescription>Available 24/7 for urgent matters</CardDescription>
             </CardHeader>
             <CardContent>
@@ -59,10 +63,12 @@ const Contact = () => {
             </CardContent>
           </Card>
 
-          <Card className="glass-card hover:animate-glow-pulse transition-all">
+          <Card className="glass-card premium-card">
             <CardHeader>
-              <MapPin className="w-10 h-10 text-accent mb-4" />
-              <CardTitle>Location</CardTitle>
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4" style={{ boxShadow: '0 0 30px hsl(var(--neon-purple) / 0.3)' }}>
+                <MapPin className="w-8 h-8 text-accent" />
+              </div>
+              <CardTitle className="text-2xl">Location</CardTitle>
               <CardDescription>Remote-first studio</CardDescription>
             </CardHeader>
             <CardContent>
