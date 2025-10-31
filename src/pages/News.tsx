@@ -4,138 +4,159 @@ import Layout from "@/components/Layout";
 import Hero from "@/components/Hero";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Clock, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface NewsArticle {
   id: string;
   title: string;
-  category: string;
+  subtitle: string | null;
   excerpt: string;
+  category: string;
   featured: boolean;
   published_at: string;
+  image_url: string | null;
 }
 
 const News = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('news_articles')
-          .select('*')
-          .order('published_at', { ascending: false });
-
-        if (error) throw error;
-        setNewsItems(data || []);
-      } catch (error) {
-        console.error('Error fetching news:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load news articles",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchNews();
-  }, [toast]);
+  }, []);
+
+  const fetchNews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('news_articles')
+        .select('*')
+        .order('featured', { ascending: false })
+        .order('published_at', { ascending: false });
+
+      if (error) throw error;
+      setNewsArticles(data || []);
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load news articles",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleArticleClick = (id: string) => {
+    navigate(`/news/${id}`);
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Hero title="Latest News" subtitle="Loading..." compact />
+      </Layout>
+    );
+  }
+
+  const featuredArticle = newsArticles.find(article => article.featured);
+  const regularArticles = newsArticles.filter(article => !article.featured);
 
   return (
     <Layout>
       <Hero 
         title="Latest News"
-        subtitle="Stay updated with the latest announcements and updates from the digital frontier"
+        subtitle="Stay updated with the latest announcements, updates, and events from the frontlines"
         compact
       />
 
       <section className="py-20 container mx-auto px-4">
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading news...</p>
-          </div>
-        ) : newsItems.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">No news articles available yet.</p>
-          </div>
-        ) : (
-          <>
-            {/* Featured Article */}
-            {newsItems.find(item => item.featured) && (
-              <Card 
-                className="gradient-border mb-12 overflow-hidden group cursor-pointer hover:animate-glow-pulse"
-                onClick={() => navigate(`/news/${newsItems.find(item => item.featured)?.id}`)}
-              >
-                <div className="grid md:grid-cols-2 gap-0">
-                  <div className="bg-gradient-to-br from-primary/20 to-secondary/20 p-12 flex items-center justify-center">
-                    <div className="text-6xl font-bold neon-text font-orbitron">FEATURED</div>
-                  </div>
-                  <CardHeader className="p-8">
-                    <div className="flex items-center gap-4 mb-4">
-                      <Badge className="bg-secondary text-secondary-foreground">
-                        {newsItems.find(item => item.featured)?.category}
-                      </Badge>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {new Date(newsItems.find(item => item.featured)?.published_at || '').toLocaleDateString()}
-                      </div>
-                    </div>
-                    <CardTitle className="text-3xl mb-4 group-hover:text-primary transition-colors">
-                      {newsItems.find(item => item.featured)?.title}
-                    </CardTitle>
-                    <CardDescription className="text-lg mb-6">
-                      {newsItems.find(item => item.featured)?.excerpt}
-                    </CardDescription>
-                    <Button className="shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)]">
-                      Read More <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </CardHeader>
-                </div>
-              </Card>
+        {/* Featured Article */}
+        {featuredArticle && (
+          <Card 
+            onClick={() => handleArticleClick(featuredArticle.id)}
+            className="gradient-border mb-12 hover:animate-glow-pulse transition-all cursor-pointer group overflow-hidden"
+          >
+            {featuredArticle.image_url && (
+              <div className="w-full h-96 overflow-hidden">
+                <img 
+                  src={featuredArticle.image_url} 
+                  alt={featuredArticle.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
             )}
-
-            {/* News Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {newsItems.filter(item => !item.featured).map((item) => (
-                <Card 
-                  key={item.id} 
-                  className="glass-card premium-card cursor-pointer group border border-primary/10"
-                  onClick={() => navigate(`/news/${item.id}`)}
-                >
-                  <CardHeader>
-                    <div className="flex items-center gap-4 mb-4">
-                      <Badge variant="outline" className="border-primary text-primary shadow-lg">
-                        {item.category}
-                      </Badge>
-                      <div className="flex items-center text-sm text-muted-foreground font-mono">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {new Date(item.published_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                      {item.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="leading-relaxed">{item.excerpt}</CardDescription>
-                    <Button variant="ghost" className="mt-4 p-0 h-auto text-primary hover:text-secondary transition-all">
-                      Read more <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </>
+            <CardHeader>
+              <div className="flex items-center gap-4 mb-4">
+                <Badge className="bg-secondary font-display">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  Featured
+                </Badge>
+                <Badge className="bg-primary font-display">{featuredArticle.category}</Badge>
+                <div className="flex items-center text-sm text-muted-foreground ml-auto">
+                  <Clock className="w-4 h-4 mr-2" />
+                  {new Date(featuredArticle.published_at).toLocaleDateString()}
+                </div>
+              </div>
+              <CardTitle className="text-4xl neon-text font-display group-hover:text-secondary transition-colors">
+                {featuredArticle.title}
+              </CardTitle>
+              {featuredArticle.subtitle && (
+                <p className="text-xl text-primary">{featuredArticle.subtitle}</p>
+              )}
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-lg">
+                {featuredArticle.excerpt}
+              </CardDescription>
+            </CardContent>
+          </Card>
         )}
+
+        {/* Regular Articles Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {regularArticles.map((article) => (
+            <Card 
+              key={article.id}
+              onClick={() => handleArticleClick(article.id)}
+              className="glass-card hover:animate-glow-pulse transition-all cursor-pointer group overflow-hidden"
+            >
+              {article.image_url && (
+                <div className="w-full h-48 overflow-hidden">
+                  <img 
+                    src={article.image_url} 
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )}
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className="bg-primary/80 font-display">{article.category}</Badge>
+                  <div className="flex items-center text-xs text-muted-foreground ml-auto">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {new Date(article.published_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors font-display">
+                  {article.title}
+                </CardTitle>
+                {article.subtitle && (
+                  <p className="text-sm text-muted-foreground">{article.subtitle}</p>
+                )}
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="line-clamp-3">
+                  {article.excerpt}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </section>
     </Layout>
   );

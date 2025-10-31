@@ -1,44 +1,77 @@
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Hero from "@/components/Hero";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Gift, Clock, Users, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Giveaway {
+  id: string;
+  title: string;
+  description: string;
+  reward: string;
+  entry_method: string;
+  ends_at: string;
+  entries_count: number;
+  status: string;
+  image_url: string | null;
+}
 
 const Giveaways = () => {
-  const activeGiveaways = [
-    {
-      title: "Legendary Skin Bundle",
-      description: "Unlock 5 exclusive neon-themed weapon skins and character cosmetics",
-      requirement: "Complete 10 matches this week",
-      endDate: "3 days left",
-      participants: 12450,
-      featured: true
-    },
-    {
-      title: "Premium Battle Pass",
-      description: "Season 3 Battle Pass with instant tier 25 unlock",
-      requirement: "Refer 3 friends to join",
-      endDate: "5 days left",
-      participants: 8920,
-      featured: false
-    },
-    {
-      title: "Currency Boost Pack",
-      description: "10,000 in-game credits plus 2x XP boost for 7 days",
-      requirement: "Daily login streak of 7 days",
-      endDate: "1 week left",
-      participants: 15670,
-      featured: false
-    }
-  ];
+  const { toast } = useToast();
+  const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pastWinners = [
-    { name: "NeonStrike", prize: "Ultimate Skin Pack", date: "Jan 10, 2025" },
-    { name: "CyberPulse", prize: "5000 Credits", date: "Jan 08, 2025" },
-    { name: "VoltRacer", prize: "Premium Pass", date: "Jan 05, 2025" },
-    { name: "QuantumLeap", prize: "Legendary Bundle", date: "Jan 03, 2025" },
-  ];
+  useEffect(() => {
+    fetchGiveaways();
+  }, []);
+
+  const fetchGiveaways = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('giveaways')
+        .select('*')
+        .eq('status', 'active')
+        .order('ends_at', { ascending: true });
+
+      if (error) throw error;
+      setGiveaways(data || []);
+    } catch (error) {
+      console.error('Error fetching giveaways:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load giveaways",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTimeRemaining = (endDate: string) => {
+    const end = new Date(endDate).getTime();
+    const now = new Date().getTime();
+    const diff = end - now;
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} left`;
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} left`;
+    
+    return "Ending soon";
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Hero title="Exclusive Giveaways" subtitle="Loading..." compact />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -49,48 +82,56 @@ const Giveaways = () => {
       />
 
       <section className="py-20 container mx-auto px-4">
-        {/* Active Giveaways */}
         <div className="mb-16">
           <div className="flex items-center gap-3 mb-8">
             <Gift className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl font-bold neon-text">Active Giveaways</h2>
+            <h2 className="text-3xl font-bold neon-text font-display">Active Giveaways</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {activeGiveaways.map((giveaway, index) => (
+            {giveaways.map((giveaway, index) => (
               <Card 
-                key={index}
+                key={giveaway.id}
                 className={`${
-                  giveaway.featured 
-                    ? 'gradient-border md:row-span-2 hover:animate-glow-pulse' 
+                  index === 0
+                    ? 'gradient-border md:col-span-2 hover:animate-glow-pulse' 
                     : 'glass-card hover:animate-glow-pulse'
                 } transition-all cursor-pointer group`}
               >
+                {giveaway.image_url && (
+                  <div className="w-full h-48 overflow-hidden rounded-t-lg">
+                    <img 
+                      src={giveaway.image_url} 
+                      alt={giveaway.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
                 <CardHeader>
-                  {giveaway.featured && (
-                    <Badge className="w-fit mb-4 bg-secondary">Featured</Badge>
+                  {index === 0 && (
+                    <Badge className="w-fit mb-4 bg-secondary font-display">Featured</Badge>
                   )}
-                  <CardTitle className={`${giveaway.featured ? 'text-3xl' : 'text-xl'} group-hover:text-primary transition-colors`}>
+                  <CardTitle className={`${index === 0 ? 'text-3xl' : 'text-xl'} group-hover:text-primary transition-colors font-display`}>
                     {giveaway.title}
                   </CardTitle>
-                  <CardDescription className={giveaway.featured ? 'text-lg' : ''}>
+                  <CardDescription className={index === 0 ? 'text-lg' : ''}>
                     {giveaway.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">{giveaway.requirement}</span>
+                    <span className="text-muted-foreground">{giveaway.entry_method}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="w-4 h-4 text-secondary" />
-                    <span className="text-muted-foreground">{giveaway.endDate}</span>
+                    <span className="text-muted-foreground">{getTimeRemaining(giveaway.ends_at)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Users className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">{giveaway.participants.toLocaleString()} participants</span>
+                    <span className="text-muted-foreground">{giveaway.entries_count.toLocaleString()} participants</span>
                   </div>
-                  <Button className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)]">
+                  <Button className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)] font-display">
                     Claim Reward
                   </Button>
                 </CardContent>
@@ -99,56 +140,36 @@ const Giveaways = () => {
           </div>
         </div>
 
-        {/* How it Works */}
         <div className="mb-16 gradient-border rounded-2xl p-8">
-          <h3 className="text-2xl font-bold mb-6 neon-text-magenta">How Giveaways Work</h3>
+          <h3 className="text-2xl font-bold mb-6 neon-text-magenta font-display">How Giveaways Work</h3>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-primary font-bold">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-primary font-bold font-display">
                 1
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Choose Your Challenge</h4>
+                <h4 className="font-semibold mb-2 font-display">Choose Your Challenge</h4>
                 <p className="text-sm text-muted-foreground">Browse active giveaways and select ones that match your playstyle</p>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary/20 border-2 border-secondary flex items-center justify-center text-secondary font-bold">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary/20 border-2 border-secondary flex items-center justify-center text-secondary font-bold font-display">
                 2
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Complete Requirements</h4>
+                <h4 className="font-semibold mb-2 font-display">Complete Requirements</h4>
                 <p className="text-sm text-muted-foreground">Fulfill the challenge objectives within the time limit</p>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center text-accent font-bold">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center text-accent font-bold font-display">
                 3
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Claim Your Prize</h4>
+                <h4 className="font-semibold mb-2 font-display">Claim Your Prize</h4>
                 <p className="text-sm text-muted-foreground">Rewards are automatically added to your account</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Recent Winners */}
-        <div>
-          <h3 className="text-2xl font-bold mb-6 neon-text">Recent Winners</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {pastWinners.map((winner, index) => (
-              <Card key={index} className="glass-card">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-secondary mx-auto mb-4 flex items-center justify-center text-2xl font-bold">
-                    {winner.name.charAt(0)}
-                  </div>
-                  <h4 className="font-semibold mb-1">{winner.name}</h4>
-                  <p className="text-sm text-primary mb-1">{winner.prize}</p>
-                  <p className="text-xs text-muted-foreground">{winner.date}</p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>

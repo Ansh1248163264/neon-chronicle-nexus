@@ -92,7 +92,7 @@ const NewsArticle = () => {
               </div>
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 neon-text font-orbitron">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 neon-text font-display">
               {article.title}
             </h1>
 
