@@ -134,6 +134,7 @@ All colors MUST be HSL.
       0 0 40px hsl(var(--neon-cyan) / 0.6),
       0 0 60px hsl(var(--neon-cyan) / 0.4),
       0 0 80px hsl(var(--neon-cyan) / 0.2);
+    animation: neon-flicker 3s ease-in-out infinite alternate;
   }
   
   .neon-text-magenta {
@@ -143,6 +144,40 @@ All colors MUST be HSL.
       0 0 40px hsl(var(--neon-magenta) / 0.6),
       0 0 60px hsl(var(--neon-magenta) / 0.4),
       0 0 80px hsl(var(--neon-magenta) / 0.2);
+    animation: neon-flicker 3s ease-in-out infinite alternate;
+  }
+  
+  /* Neon Flicker Animation */
+  @keyframes neon-flicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% {
+      opacity: 1;
+      text-shadow: 
+        0 0 10px hsl(var(--neon-cyan) / 1),
+        0 0 20px hsl(var(--neon-cyan) / 0.8),
+        0 0 40px hsl(var(--neon-cyan) / 0.6),
+        0 0 60px hsl(var(--neon-cyan) / 0.4),
+        0 0 80px hsl(var(--neon-cyan) / 0.2);
+    }
+    20%, 24%, 55% {
+      opacity: 0.85;
+      text-shadow: none;
+    }
+  }
+  
+  /* Neon Pulse Animation */
+  @keyframes neon-pulse {
+    0%, 100% {
+      opacity: 1;
+      filter: brightness(1) drop-shadow(0 0 20px hsl(var(--neon-cyan) / 0.5));
+    }
+    50% {
+      opacity: 0.9;
+      filter: brightness(1.2) drop-shadow(0 0 40px hsl(var(--neon-cyan) / 0.8));
+    }
+  }
+  
+  .neon-pulse {
+    animation: neon-pulse 2s ease-in-out infinite;
   }
   
   /* Premium card hover effect */

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, MessageSquare, MapPin } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -18,13 +19,29 @@ const Contact = () => {
     message: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you within 24 hours.",
-    });
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([formData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
