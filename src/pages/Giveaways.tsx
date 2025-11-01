@@ -7,6 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Gift, Clock, Users, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Giveaway {
   id: string;
@@ -24,6 +34,8 @@ const Giveaways = () => {
   const { toast } = useToast();
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGiveaway, setSelectedGiveaway] = useState<Giveaway | null>(null);
+  const [claimData, setClaimData] = useState({ email: "", username: "" });
 
   useEffect(() => {
     fetchGiveaways();
@@ -49,6 +61,18 @@ const Giveaways = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClaimReward = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedGiveaway) return;
+
+    toast({
+      title: "Entry Submitted! 🎉",
+      description: `You've entered the ${selectedGiveaway.title} giveaway. Good luck!`,
+    });
+    setClaimData({ email: "", username: "" });
+    setSelectedGiveaway(null);
   };
 
   const getTimeRemaining = (endDate: string) => {
@@ -83,9 +107,9 @@ const Giveaways = () => {
 
       <section className="py-20 container mx-auto px-4">
         <div className="mb-16">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-8 justify-center">
             <Gift className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl font-bold neon-text font-display">Active Giveaways</h2>
+            <h2 className="text-3xl font-bold holographic-text font-display">Active Giveaways</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -131,9 +155,50 @@ const Giveaways = () => {
                     <Users className="w-4 h-4 text-accent" />
                     <span className="text-muted-foreground">{giveaway.entries_count.toLocaleString()} participants</span>
                   </div>
-                  <Button className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)] font-display">
-                    Claim Reward
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)] font-display"
+                        onClick={() => setSelectedGiveaway(giveaway)}
+                      >
+                        Claim Reward
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md bg-background border-primary/30">
+                      <DialogHeader>
+                        <DialogTitle className="neon-text font-display text-2xl">Enter Giveaway</DialogTitle>
+                        <DialogDescription>
+                          Enter your details to claim your reward for {giveaway.title}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleClaimReward} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="username">Username</Label>
+                          <Input
+                            id="username"
+                            value={claimData.username}
+                            onChange={(e) => setClaimData({ ...claimData, username: e.target.value })}
+                            required
+                            className="bg-input border-primary/30 focus:border-primary"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={claimData.email}
+                            onChange={(e) => setClaimData({ ...claimData, email: e.target.value })}
+                            required
+                            className="bg-input border-primary/30 focus:border-primary"
+                          />
+                        </div>
+                        <Button type="submit" className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)]">
+                          Submit Entry
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             ))}

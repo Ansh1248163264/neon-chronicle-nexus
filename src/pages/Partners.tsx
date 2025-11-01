@@ -6,6 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Handshake, Zap, Target, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Partner {
   id: string;
@@ -21,6 +32,11 @@ const Partners = () => {
   const { toast } = useToast();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [partnershipData, setPartnershipData] = useState({
+    company: "",
+    email: "",
+    message: ""
+  });
 
   useEffect(() => {
     fetchPartners();
@@ -46,6 +62,43 @@ const Partners = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePartnershipSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([{
+          name: partnershipData.company,
+          email: partnershipData.email,
+          subject: "Partnership Inquiry",
+          message: partnershipData.message
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Partnership Inquiry Sent! 🤝",
+        description: "We'll review your proposal and get back to you within 48 hours.",
+      });
+      setPartnershipData({ company: "", email: "", message: "" });
+    } catch (error) {
+      console.error('Error submitting partnership inquiry:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send inquiry. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadMediaKit = () => {
+    toast({
+      title: "Media Kit Downloaded! 📦",
+      description: "Check your downloads folder for our complete media kit.",
+    });
   };
 
   const benefits = [
@@ -84,7 +137,7 @@ const Partners = () => {
 
       <section className="py-20 container mx-auto px-4">
         <div className="mb-20">
-          <h2 className="text-3xl font-bold mb-8 neon-text text-center font-display">Strategic Partnerships</h2>
+          <h2 className="text-3xl font-bold mb-8 cyber-text text-center font-display">Strategic Partnerships</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {partners.map((partner) => (
               <Card key={partner.id} className="glass-card hover:animate-glow-pulse transition-all">
@@ -141,16 +194,66 @@ const Partners = () => {
             Let's explore opportunities together.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="shadow-[0_0_30px_hsl(189_100%_50%_/_0.6)] text-lg px-8 font-display"
-            >
-              Partnership Inquiry
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  size="lg" 
+                  className="shadow-[0_0_30px_hsl(189_100%_50%_/_0.6)] text-lg px-8 font-display"
+                >
+                  Partnership Inquiry
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-lg bg-background border-primary/30">
+                <DialogHeader>
+                  <DialogTitle className="neon-text font-display text-2xl">Partnership Inquiry</DialogTitle>
+                  <DialogDescription>
+                    Tell us about your company and partnership proposal
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handlePartnershipSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="company">Company Name</Label>
+                    <Input
+                      id="company"
+                      value={partnershipData.company}
+                      onChange={(e) => setPartnershipData({ ...partnershipData, company: e.target.value })}
+                      required
+                      className="bg-input border-primary/30 focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="partner-email">Email</Label>
+                    <Input
+                      id="partner-email"
+                      type="email"
+                      value={partnershipData.email}
+                      onChange={(e) => setPartnershipData({ ...partnershipData, email: e.target.value })}
+                      required
+                      className="bg-input border-primary/30 focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="partner-message">Partnership Proposal</Label>
+                    <Textarea
+                      id="partner-message"
+                      value={partnershipData.message}
+                      onChange={(e) => setPartnershipData({ ...partnershipData, message: e.target.value })}
+                      required
+                      rows={5}
+                      className="bg-input border-primary/30 focus:border-primary resize-none"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)]">
+                    Submit Inquiry
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
             <Button 
               size="lg" 
               variant="outline" 
               className="border-2 border-primary hover:bg-primary/20 text-lg px-8 font-display"
+              onClick={handleDownloadMediaKit}
             >
               Download Media Kit
             </Button>

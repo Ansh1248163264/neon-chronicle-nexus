@@ -7,6 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Briefcase, MapPin, Clock, Code, Palette, Megaphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface JobPosting {
   id: string;
@@ -25,6 +36,13 @@ const Careers = () => {
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
+  const [applicationData, setApplicationData] = useState({
+    name: "",
+    email: "",
+    portfolio_url: "",
+    message: ""
+  });
 
   useEffect(() => {
     fetchJobs();
@@ -49,6 +67,36 @@ const Careers = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJobApplication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedJob) return;
+
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .insert([{
+          ...applicationData,
+          job_id: selectedJob.id
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Application Submitted! 🚀",
+        description: `Your application for ${selectedJob.title} has been received. We'll be in touch soon!`,
+      });
+      setApplicationData({ name: "", email: "", portfolio_url: "", message: "" });
+      setSelectedJob(null);
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -88,7 +136,7 @@ const Careers = () => {
 
       <section className="py-20 container mx-auto px-4">
         <div className="mb-20 max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6 neon-text font-display">Why Work With Us</h2>
+          <h2 className="text-3xl font-bold mb-6 holographic-text font-display">Why Work With Us</h2>
           <p className="text-lg text-muted-foreground mb-12">
             We're a remote-first studio passionate about pushing creative boundaries. 
             Our team combines technical excellence with artistic vision to create unforgettable gaming experiences.
@@ -134,9 +182,72 @@ const Careers = () => {
                         </div>
                       </div>
                     </div>
-                    <Button className="shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)] font-display">
-                      Apply Now
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          className="shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)] font-display"
+                          onClick={() => setSelectedJob(job)}
+                        >
+                          Apply Now
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-lg bg-background border-primary/30">
+                        <DialogHeader>
+                          <DialogTitle className="neon-text font-display text-2xl">Apply for {job.title}</DialogTitle>
+                          <DialogDescription>
+                            Submit your application and we'll review it within 5 business days
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleJobApplication} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="app-name">Full Name</Label>
+                            <Input
+                              id="app-name"
+                              value={applicationData.name}
+                              onChange={(e) => setApplicationData({ ...applicationData, name: e.target.value })}
+                              required
+                              className="bg-input border-primary/30 focus:border-primary"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="app-email">Email</Label>
+                            <Input
+                              id="app-email"
+                              type="email"
+                              value={applicationData.email}
+                              onChange={(e) => setApplicationData({ ...applicationData, email: e.target.value })}
+                              required
+                              className="bg-input border-primary/30 focus:border-primary"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="portfolio">Portfolio URL</Label>
+                            <Input
+                              id="portfolio"
+                              type="url"
+                              value={applicationData.portfolio_url}
+                              onChange={(e) => setApplicationData({ ...applicationData, portfolio_url: e.target.value })}
+                              placeholder="https://your-portfolio.com"
+                              className="bg-input border-primary/30 focus:border-primary"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="app-message">Cover Letter</Label>
+                            <Textarea
+                              id="app-message"
+                              value={applicationData.message}
+                              onChange={(e) => setApplicationData({ ...applicationData, message: e.target.value })}
+                              required
+                              rows={5}
+                              className="bg-input border-primary/30 focus:border-primary resize-none"
+                            />
+                          </div>
+                          <Button type="submit" className="w-full shadow-[0_0_20px_hsl(189_100%_50%_/_0.5)]">
+                            Submit Application
+                          </Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardHeader>
                 <CardContent>

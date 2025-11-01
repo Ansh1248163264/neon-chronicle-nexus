@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import Hero from "@/components/Hero";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,8 +6,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle, HelpCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 const Troubleshooting = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredIssues, setFilteredIssues] = useState<any[]>([]);
+  
   const commonIssues = [
     {
       category: "Performance",
@@ -59,6 +65,24 @@ const Troubleshooting = () => {
     { title: "Restart Router", description: "Fixes connection issues" }
   ];
 
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    if (value.trim() === "") {
+      setFilteredIssues([]);
+      return;
+    }
+
+    const filtered = commonIssues.map(section => ({
+      ...section,
+      problems: section.problems.filter(problem =>
+        problem.q.toLowerCase().includes(value.toLowerCase()) ||
+        problem.a.toLowerCase().includes(value.toLowerCase())
+      )
+    })).filter(section => section.problems.length > 0);
+
+    setFilteredIssues(filtered);
+  };
+
   return (
     <Layout>
       <Hero 
@@ -74,9 +98,14 @@ const Troubleshooting = () => {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <Input 
               placeholder="Search for solutions..." 
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-12 py-6 text-lg bg-input border-primary/30 focus:border-primary"
             />
           </div>
+          {searchQuery && filteredIssues.length === 0 && (
+            <p className="text-center text-muted-foreground mt-4">No results found. Try different keywords.</p>
+          )}
         </div>
 
         {/* Quick Fixes */}
@@ -96,7 +125,7 @@ const Troubleshooting = () => {
 
         {/* FAQ Sections */}
         <div className="space-y-8">
-          {commonIssues.map((section, sectionIndex) => (
+          {(searchQuery ? filteredIssues : commonIssues).map((section, sectionIndex) => (
             <div key={sectionIndex}>
               <div className="flex items-center gap-3 mb-6">
                 {section.icon}
@@ -166,14 +195,16 @@ const Troubleshooting = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="shadow-[0_0_30px_hsl(189_100%_50%_/_0.6)] text-lg px-8"
+              className="shadow-[0_0_30px_hsl(189_100%_50%_/_0.6)] text-lg px-8 font-display"
+              onClick={() => navigate('/contact')}
             >
               Contact Support
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-2 border-primary hover:bg-primary/20 text-lg px-8"
+              className="border-2 border-primary hover:bg-primary/20 text-lg px-8 font-display"
+              onClick={() => window.open('https://discord.gg/gaming', '_blank')}
             >
               Join Discord Community
             </Button>
